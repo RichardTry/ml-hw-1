@@ -2,11 +2,12 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
 import pickle
+from sklearn.linear_model import Lasso
 
 with open('weights.pkl', 'rb') as f:
     weights = load(f)
 
-model = 
+model = Lasso()
 
 app = FastAPI()
 
@@ -38,4 +39,12 @@ def predict_item(item: Item) -> float:
 
 @app.post("/predict_items")
 def predict_items(items: List[Item]) -> List[float]:
-    return MODEL.predict(items)
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+
+    model.fit(X_train_scaled, y_train)
+    prediction = model.predict(X_test_scaled)
+    r2_score(y_test, prediction)
+
+    return model.predict(items)
